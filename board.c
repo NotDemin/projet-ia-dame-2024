@@ -4,6 +4,51 @@
 #include "board.h"
 #include <string.h>
 
+// initialisation du jeu de dames
+Item* initGame()
+{
+    Item *node;
+
+    char *initial = (char*)malloc(MAX_BOARD*sizeof(char));
+    for (int i=0; i<MAX_BOARD; i++) initial[i] = 0;
+
+    // boucle pour placé les pions des deux couleurs
+    for (int i = 0; i < MAX_BOARD; i++)
+    {
+        int x = i / WH_BOARD;
+        int y = i % WH_BOARD;
+
+        // initialisation des cases vides par défaut
+        initial[i] = 0;
+
+        // initialisation des pions noirs
+        if (x <= 3)
+        {
+            if ((x + y) % 2 == 0)
+            {
+                initial[i] = 1;
+            }
+        }
+
+        // initialisation des pions blancs
+        if (x >= 6)
+        {
+            if ((x + y) % 2 == 0)
+            {
+                initial[i] = 2;
+            }
+        }
+
+    }
+
+    node = newNode();
+    initBoard(node, initial);
+
+    node->depth = 0;
+
+    return node;
+}
+
 // print a board
 void printBoard( Item *node )
 {

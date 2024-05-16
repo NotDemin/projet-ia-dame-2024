@@ -3,10 +3,16 @@
 //
 
 #include "board.h"
+#include "list.h"
+#include <stdio.h>
 
 int main(int argc, char *argv[]) {
+//
+//    initList(&openList_p);
+//    initList(&closedList_p);
 
-    Board board;
+    Item *initial_state = initGame();
+    printBoard(initial_state);
 
     return 0;
 }
