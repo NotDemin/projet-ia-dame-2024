@@ -49,6 +49,7 @@ Item* initGame()
     return node;
 }
 
+
 // print a board
 void printBoard( Item *node )
 {
@@ -67,11 +68,65 @@ void printBoard( Item *node )
     printf("\n");
 }
 
+int isValidPosition(Item* node, int pos) {
+    int ii = pos / WH_BOARD;
+    int jj = pos % WH_BOARD;
+    int count = 0;
+    if(!(jj = 0 || jj == WH_BOARD - 1 ))
+    {
+        if(node->board[(((ii+1)*WH_BOARD)+jj)+1] == 0)
+        {
+            count++;
+        }
+        if(node->board[(((ii+1)*WH_BOARD)+jj)-1] == 0)
+        {
+            count++;
+        }
+    }
+    else
+    {
+        if(jj == 0)
+        {
+            if(node->board[(((ii+1)*WH_BOARD)+jj)+1] == 0)
+            {
+                count++;
+            }
+        }
+        else
+        {
+            if(node->board[(((ii+1)*WH_BOARD)+jj)-1] == 0)
+            {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+int isValidPositionQueen(Item* node, int pos) {
+    int ii = pos / WH_BOARD;
+    int jj = pos % WH_BOARD;
+
+    for (int i=0; i<WH_BOARD; i++)
+    {
+        for (int j=0; j<WH_BOARD; j++)
+        {
+            if((abs(ii-i) == abs( jj-j))){
+                if (node->board[i*WH_BOARD+j]!=0)
+                {
+                    return 1;
+                }
+            }
+
+        }
+    }
+    return 0;
+}
 
 // initialize node's state from a given board
 void initBoard(Item *node, char *board) {
 	assert( node );
-	
+
 	node->size = MAX_BOARD;
     node->board = calloc(MAX_BOARD, sizeof(char));
 
