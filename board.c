@@ -69,44 +69,119 @@ void printBoard( Item *node )
 }
 
 int isValidPosition(Item* node, int pos) {
-    int ii = pos / WH_BOARD;
-    int jj = pos % WH_BOARD;
+    int ii = pos / WH_BOARD; // Calcul de la ligne
+    int jj = pos % WH_BOARD; // Calcul de la colonne
     int count = 0;
-    if(!(jj = 0 || jj == WH_BOARD - 1 ))
-    {
-        if(node->board[(((ii+1)*WH_BOARD)+jj)+1] == 0)
-        {
-            count++;
-        }
-        if(node->board[(((ii+1)*WH_BOARD)+jj)-1] == 0)
-        {
-            count++;
-        }
+
+    // Vérifier si la case contient un pion blanc ou noir
+    char piece = node->board[ii * WH_BOARD + jj];
+    if (piece != 1 && piece != 2) {
+        return 0; // La case ne contient pas un pion valide
     }
-    else
-    {
-        if(jj == 0)
-        {
-            if(node->board[(((ii+1)*WH_BOARD)+jj)+1] == 0)
-            {
+
+    int direction = (piece == 1) ? -1 : 1; // Direction de déplacement : blanc (-1) vers le haut, noir (+1) vers le bas
+
+    // Vérifier les déplacements et captures diagonales
+    if (jj > 0 && jj < WH_BOARD - 1) {
+        // Vérifier si les cases diagonales droite et gauche sont vides
+        if (ii + direction >= 0 && ii + direction < WH_BOARD) {
+            if (node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 0) {
+                count++;
+            }
+            if (node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 0) {
                 count++;
             }
         }
-        else
-        {
-            if(node->board[(((ii+1)*WH_BOARD)+jj)-1] == 0)
-            {
+
+        // Vérifier les captures pour un pion blanc
+        if (piece == 1) {
+            if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
+                (jj + 2 < WH_BOARD) &&
+                node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
+                node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
+                count += 2;
+            }
+            if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
+                (jj - 2 >= 0) &&
+                node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 2 &&
+                node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
+                count += 2;
+            }
+        }
+
+        // Vérifier les captures pour un pion noir
+        if (piece == 2) {
+            if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
+                (jj + 2 < WH_BOARD) &&
+                node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
+                node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
+                count += 2;
+            }
+            if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
+                (jj - 2 >= 0) &&
+                node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 1 &&
+                node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
+                count += 2;
+            }
+        }
+    } else {
+        // Vérifier les limites de la colonne gauche
+        if (jj == 0 && ii + direction >= 0 && ii + direction < WH_BOARD) {
+            if (node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 0) {
                 count++;
+            }
+
+            // Vérifier les captures pour un pion blanc
+            if (piece == 1) {
+                if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
+                    node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
+                    node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
+                    count += 2;
+                }
+            }
+
+            // Vérifier les captures pour un pion noir
+            if (piece == 2) {
+                if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
+                    node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
+                    node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
+                    count += 2;
+                }
+            }
+        } else if (jj == WH_BOARD - 1 && ii + direction >= 0 && ii + direction < WH_BOARD) { // Vérifier les limites de la colonne droite
+            if (node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 0) {
+                count++;
+            }
+
+            // Vérifier les captures pour un pion blanc
+            if (piece == 1) {
+                if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
+                    node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 2 &&
+                    node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
+                    count += 2;
+                }
+            }
+
+            // Vérifier les captures pour un pion noir
+            if (piece == 2) {
+                if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
+                    node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 1 &&
+                    node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
+                    count += 2;
+                }
             }
         }
     }
+
     return count;
 }
+
 
 int isValidPositionQueen(Item* node, int pos) {
     int ii = pos / WH_BOARD;
     int jj = pos % WH_BOARD;
-
+    int count = 0;
+    // à modifier
     for (int i=0; i<WH_BOARD; i++)
     {
         for (int j=0; j<WH_BOARD; j++)
