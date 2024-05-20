@@ -20,13 +20,13 @@ typedef enum {
 struct isValidMove {
     int isValid;
     int count;
-    MoveResult result;
+    list_t result;
 };
 typedef struct isValidMove isValidMove;
 
 void initBoard(Item *node, char *board);
 Item* initGame();
 
-Item *getChildBoard( Item *node, int pos, int isKnight);
+Item *getChildBoard( Item *node, int pos);
 
 void printBoard( Item *board );

@@ -72,6 +72,9 @@ isValidMove* isValidPosition(Item* node, int pos) {
     int ii = pos / WH_BOARD; // Calcul de la ligne
     int jj = pos % WH_BOARD; // Calcul de la colonne
     isValidMove *result = (isValidMove*)malloc(sizeof(isValidMove));
+    initList(result->result);
+    Item *itemResult = newNode();
+
     result->count = 0;
 
     // Vérifier si la case contient un pion blanc ou noir
@@ -88,11 +91,13 @@ isValidMove* isValidPosition(Item* node, int pos) {
         if (ii + direction >= 0 && ii + direction < WH_BOARD) {
             if (node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 0) {
                 result->count++;
-                result->result = MOVE_RIGHT;
+                itemResult->f = MOVE_RIGHT;
+                addLast(result->result, itemResult);
             }
             if (node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 0) {
                 result->count++;
-                result->result = result->result == MOVE_RIGHT ? MOVE_BOTH : MOVE_LEFT;
+                itemResult->f = MOVE_LEFT;
+                addLast(result->result, itemResult);
             }
         }
 
@@ -103,14 +108,16 @@ isValidMove* isValidPosition(Item* node, int pos) {
                 node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                 result->count += 2;
-                result->result = CAPTURE_RIGHT;
+                itemResult->f = CAPTURE_RIGHT;
+                addLast(result->result, itemResult);
             }
             if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
                 (jj - 2 >= 0) &&
                 node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 2 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                 result->count += 2;
-                result->result = result->result == CAPTURE_RIGHT ? CAPTURE_BOTH : CAPTURE_LEFT;
+                itemResult->f = CAPTURE_LEFT;
+                addLast(result->result, itemResult);
             }
         }
 
@@ -121,14 +128,16 @@ isValidMove* isValidPosition(Item* node, int pos) {
                 node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                 result->count += 2;
-                result->result = CAPTURE_RIGHT;
+                itemResult->f = CAPTURE_RIGHT;
+                addLast(result->result, itemResult);
             }
             if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
                 (jj - 2 >= 0) &&
                 node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 1 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                 result->count += 2;
-                result->result = result->result == CAPTURE_RIGHT ? CAPTURE_BOTH : CAPTURE_LEFT;
+                itemResult->f = CAPTURE_LEFT;
+                addLast(result->result, itemResult);
             }
         }
     } else {
@@ -144,7 +153,8 @@ isValidMove* isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                     result->count += 2;
-                    result->result = CAPTURE_RIGHT;
+                    itemResult->f = CAPTURE_RIGHT;
+                    addLast(result->result, itemResult);
                 }
             }
 
@@ -154,7 +164,8 @@ isValidMove* isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                     result->count += 2;
-                    result->result = CAPTURE_RIGHT;
+                    itemResult->f = CAPTURE_RIGHT;
+                    addLast(result->result, itemResult);
                 }
             }
         } else if (jj == WH_BOARD - 1 && ii + direction >= 0 && ii + direction < WH_BOARD) { // Vérifier les limites de la colonne droite
@@ -168,7 +179,8 @@ isValidMove* isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 2 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                     count += 2;
-                    result->result = CAPTURE_LEFT;
+                    itemResult->f = CAPTURE_LEFT;
+                    addLast(result->result, itemResult);
                 }
             }
 
@@ -178,7 +190,8 @@ isValidMove* isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 1 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                     count += 2;
-                    result->result = CAPTURE_LEFT;
+                    itemResult->f = CAPTURE_LEFT;
+                    addLast(result->result, itemResult);
                 }
             }
         }
@@ -222,34 +235,58 @@ void initBoard(Item *node, char *board) {
     memcpy(node->board, board, MAX_BOARD * sizeof(char));
 }
 
+int MinMax(Item *node, int depth, int isMaximizingPlayer) {
+    if (depth == 0) {
+        return node->f;
+    }
+
+    if (isMaximizingPlayer) {
+        int bestValue = -1000;
+        for (int i = 0; i < MAX_BOARD; i++) {
+            if (node->board[i] == 0) {
+                Item *child = getChildBoard(node, i, 0);
+                if (child != NULL) {
+                    int val = MinMax(child, depth - 1, 0);
+                    bestValue = bestValue > val ? bestValue : val;
+                }
+            }
+        }
+        return bestValue;
+    } else {
+        int bestValue = 1000;
+        for (int i = 0; i < MAX_BOARD; i++) {
+            if (node->board[i] == 0) {
+                Item *child = getChildBoard(node, i, 0);
+                if (child != NULL) {
+                    int val = MinMax(child, depth - 1, 1);
+                    bestValue = bestValue < val ? bestValue : val;
+                }
+            }
+        }
+        return bestValue;
+    }
+}
+
 // Return a new item where a new queen is added at position pos if possible. NULL if not valid
-Item *getChildBoard( Item *node, int pos, int isKnight) {
+Item *getChildBoard( Item *node, int pos) {
 
     // #TODO modif ça
-    int isValid = 1;
+    isValidMove *result = isValidPosition(node, pos);
 
-    if (isValid) {
-        // Allouer et initialiser le noeud enfant
-        Item *child_p = newNode();
-        if (child_p == NULL)
-        {
-            return NULL;
+    if (result->isValid) {
+        // on récup le meilleur prochain coup avec minmax
+        for (int i = 0; i < MAX_BOARD; i++) {
+            if (node->board[i] == 0) {
+                Item *child = newNode();
+                initBoard(child, node->board);
+                child->board[i] = 1;
+                child->depth = node->depth + 1;
+                child->f = MinMax(child, 3, 0);
+                return child;
+            }
         }
-
-        initBoard(child_p, node->board);
-
-        child_p->board[pos] = 1;
-
-        // Lier l'enfant à son parent
-        child_p->parent = node;
-        child_p->depth = node->depth + 1;
-
-        child_p->prev = child_p->next = NULL;
-        child_p->f = node->f + 1;
-        child_p->g = child_p->h = 0.0;
-
-        return child_p;
     }
+
 
     return NULL;
 }
