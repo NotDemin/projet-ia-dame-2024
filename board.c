@@ -88,7 +88,7 @@ isValidMove* isValidPosition(Item* node, int pos) {
         if (ii + direction >= 0 && ii + direction < WH_BOARD) {
             if (node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 0) {
                 result->count++;
-                result->result = MOVE_RIGHT
+                result->result = MOVE_RIGHT;
             }
             if (node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 0) {
                 result->count++;
@@ -103,7 +103,7 @@ isValidMove* isValidPosition(Item* node, int pos) {
                 node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                 result->count += 2;
-                result->result = CAPTURE_RIGHT
+                result->result = CAPTURE_RIGHT;
             }
             if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
                 (jj - 2 >= 0) &&
@@ -121,7 +121,7 @@ isValidMove* isValidPosition(Item* node, int pos) {
                 node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                 result->count += 2;
-                result->result = CAPTURE_RIGHT
+                result->result = CAPTURE_RIGHT;
             }
             if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
                 (jj - 2 >= 0) &&
@@ -144,7 +144,7 @@ isValidMove* isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                     result->count += 2;
-                    result->result = CAPTURE_RIGHT
+                    result->result = CAPTURE_RIGHT;
                 }
             }
 
@@ -154,7 +154,7 @@ isValidMove* isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                     result->count += 2;
-                    result->result = CAPTURE_RIGHT
+                    result->result = CAPTURE_RIGHT;
                 }
             }
         } else if (jj == WH_BOARD - 1 && ii + direction >= 0 && ii + direction < WH_BOARD) { // Vérifier les limites de la colonne droite
@@ -168,7 +168,7 @@ isValidMove* isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 2 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                     count += 2;
-                    result->result = CAPTURE_LEFT
+                    result->result = CAPTURE_LEFT;
                 }
             }
 
@@ -178,7 +178,7 @@ isValidMove* isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 1 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                     count += 2;
-                    result->result = CAPTURE_LEFT
+                    result->result = CAPTURE_LEFT;
                 }
             }
         }
