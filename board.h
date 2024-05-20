@@ -16,7 +16,7 @@ typedef enum {
     CAPTURE_LEFT = 4,
     CAPTURE_RIGHT = 5,
     CAPTURE_BOTH = 6
-} MoveResult;7
+} MoveResult;
 struct isValidMove {
     int isValid;
     int count;
