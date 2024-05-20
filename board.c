@@ -68,9 +68,10 @@ void printBoard( Item *node )
     printf("\n");
 }
 
-int isValidPosition(Item* node, int pos) {
+isValidMove* isValidPosition(Item* node, int pos) {
     int ii = pos / WH_BOARD; // Calcul de la ligne
     int jj = pos % WH_BOARD; // Calcul de la colonne
+    isValidMove *result = (isValidMove*)malloc(sizeof(isValidMove));
     int count = 0;
 
     // Vérifier si la case contient un pion blanc ou noir
@@ -87,9 +88,11 @@ int isValidPosition(Item* node, int pos) {
         if (ii + direction >= 0 && ii + direction < WH_BOARD) {
             if (node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 0) {
                 count++;
+                result->result = MOVE_RIGHT
             }
             if (node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 0) {
                 count++;
+                result->result = MOVE_LEFT
             }
         }
 
@@ -100,12 +103,14 @@ int isValidPosition(Item* node, int pos) {
                 node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                 count += 2;
+                result->result = CAPTURE_RIGHT
             }
             if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
                 (jj - 2 >= 0) &&
                 node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 2 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                 count += 2;
+                result->result = CAPTURE_LEFT
             }
         }
 
@@ -116,12 +121,14 @@ int isValidPosition(Item* node, int pos) {
                 node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                 count += 2;
+                result->result = CAPTURE_RIGHT
             }
             if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
                 (jj - 2 >= 0) &&
                 node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 1 &&
                 node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                 count += 2;
+                result->result = CAPTURE_LEFT
             }
         }
     } else {
@@ -129,6 +136,7 @@ int isValidPosition(Item* node, int pos) {
         if (jj == 0 && ii + direction >= 0 && ii + direction < WH_BOARD) {
             if (node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 0) {
                 count++;
+                result->result = MOVE_BOTH
             }
 
             // Vérifier les captures pour un pion blanc
@@ -137,6 +145,7 @@ int isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                     count += 2;
+                    result->result = CAPTURE_RIGHT
                 }
             }
 
@@ -146,11 +155,13 @@ int isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
                     count += 2;
+                    result->result = CAPTURE_RIGHT
                 }
             }
         } else if (jj == WH_BOARD - 1 && ii + direction >= 0 && ii + direction < WH_BOARD) { // Vérifier les limites de la colonne droite
             if (node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 0) {
                 count++;
+                result->result = MOVE_BOTH
             }
 
             // Vérifier les captures pour un pion blanc
@@ -159,6 +170,7 @@ int isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 2 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                     count += 2;
+                    result->result = CAPTURE_LEFT
                 }
             }
 
@@ -168,12 +180,16 @@ int isValidPosition(Item* node, int pos) {
                     node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 1 &&
                     node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
                     count += 2;
+                    result->result = CAPTURE_LEFT
                 }
             }
         }
     }
 
-    return count;
+    result->count = count;
+    result->isValid = (count > 0) ? 1 : 0;
+
+    return result;
 }
 
 
