@@ -235,38 +235,6 @@ void initBoard(Item *node, char *board) {
     memcpy(node->board, board, MAX_BOARD * sizeof(char));
 }
 
-int MinMax(Item *node, int depth, int isMaximizingPlayer) {
-    if (depth == 0) {
-        return node->f;
-    }
-
-    if (isMaximizingPlayer) {
-        int bestValue = -1000;
-        for (int i = 0; i < MAX_BOARD; i++) {
-            if (node->board[i] == 0) {
-                Item *child = getChildBoard(node, i);
-                if (child != NULL) {
-                    int val = MinMax(child, depth - 1, 0);
-                    bestValue = bestValue > val ? bestValue : val;
-                }
-            }
-        }
-        return bestValue;
-    } else {
-        int bestValue = 1000;
-        for (int i = 0; i < MAX_BOARD; i++) {
-            if (node->board[i] == 0) {
-                Item *child = getChildBoard(node, i);
-                if (child != NULL) {
-                    int val = MinMax(child, depth - 1, 1);
-                    bestValue = bestValue < val ? bestValue : val;
-                }
-            }
-        }
-        return bestValue;
-    }
-}
-
 // Return a new item where a new queen is added at position pos if possible. NULL if not valid
 Item *getChildBoard( Item *node, int pos) {
 
@@ -274,17 +242,28 @@ Item *getChildBoard( Item *node, int pos) {
     isValidMove *result = isValidPosition(node, pos);
 
     if (result->isValid) {
-        // on récup le meilleur prochain coup avec minmax
-        for (int i = 0; i < MAX_BOARD; i++) {
-            if (node->board[i] == 0) {
-                Item *child = newNode();
-                initBoard(child, node->board);
-                child->board[i] = 1;
-                child->depth = node->depth + 1;
-                child->f = MinMax(child, 3, 0);
-                return child;
-            }
+        Item *bestChild = newNode();
+        if (bestChild == NULL)
+        {
+            return NULL;
         }
+
+        initBoard(bestChild, node->board);
+
+        bestChild->board[pos] = 1;
+
+        // Lier l'enfant à son parent
+        bestChild->parent = node;
+        bestChild->depth = node->depth + 1;
+
+        bestChild->prev = bestChild->next = NULL;
+        bestChild->f = node->f + 1;
+        bestChild->g = bestChild->h = 0.0;
+
+//        printBoard(child_p);
+        return bestChild;
+
+
     }
 
 
