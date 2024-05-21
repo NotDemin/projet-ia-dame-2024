@@ -1,32 +1,31 @@
-#include "list.h"
+#ifndef BOARD_H
+#define BOARD_H
 
-#define RANDINIT()  srand(time(NULL))
-#define RANDOM()  ((float)rand() / (float)RAND_MAX)
-#define RANDMAX(x)  (int)((float)(x)*rand()/(RAND_MAX+1.0))
-
-#define MAX_BOARD 100
-#define WH_BOARD 10
-#define HG_BOARD 10
+#define NUM_CELL 10
 
 typedef enum {
-    EMPTY = 0,
-    MOVE_LEFT = 1,
-    MOVE_RIGHT = 2,
-    MOVE_BOTH= 3,
-    CAPTURE_LEFT = 4,
-    CAPTURE_RIGHT = 5,
-    CAPTURE_BOTH = 6
-} MoveResult;
-struct isValidMove {
-    int isValid;
-    int count;
-    int result;
-};
-typedef struct isValidMove isValidMove;
+    PAWN_NULL = -1,
+    PAWN_WHITE = 0,
+    PAWN_BLACK = 1,
+    KING_WHITE = 2,
+    KING_BLACK = 3
+} PawnType;
 
-void initBoard(Item *node, char *board);
-Item* initGame();
+typedef struct {
+    int row;
+    int col;
+    int eatenrow;
+    int eatencol;
+    int move;
+    PawnType type;
+} Move;
 
-Item *getChildBoard( Item *node, int pos);
+void initBoard(PawnType board[NUM_CELL][NUM_CELL]);
+void printBoard(PawnType board[NUM_CELL][NUM_CELL]);
+int isValidMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int toRow, int toCol);
+void makeMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int toRow, int toCol);
+void convertCoordinate(char* coord, int* row, int* col);
+int canCapture(PawnType board[NUM_CELL][NUM_CELL], int row, int col);
+int getCaptureMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, Move captureMoves[]);
 
-void printBoard( Item *board );
+#endif // BOARD_H

@@ -1,261 +1,176 @@
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
 #include "board.h"
-#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-// initialisation du jeu de dames
-Item* initGame()
-{
-    Item *node;
-
-    char *initial = (char*)malloc(MAX_BOARD*sizeof(char));
-    for (int i=0; i<MAX_BOARD; i++) initial[i] = 0;
-
-    // boucle pour placé les pions des deux couleurs
-    for (int i = 0; i < MAX_BOARD; i++)
-    {
-        int x = i / WH_BOARD;
-        int y = i % WH_BOARD;
-
-        // initialisation des cases vides par défaut
-        initial[i] = 0;
-
-        // initialisation des pions noirs
-        if (x <= 3)
-        {
-            if ((x + y) % 2 == 0)
-            {
-                initial[i] = 1;
+void initBoard(PawnType board[NUM_CELL][NUM_CELL]) {
+    for (int i = 0; i < NUM_CELL; i++) {
+        for (int j = 0; j < NUM_CELL; j++) {
+            if (i < 4 && (i + j) % 2 == 1) {
+                board[i][j] = PAWN_BLACK;
+            } else if (i > 5 && (i + j) % 2 == 1) {
+                board[i][j] = PAWN_WHITE;
+            } else {
+                board[i][j] = PAWN_NULL;
             }
         }
-
-        // initialisation des pions blancs
-        if (x >= 6)
-        {
-            if ((x + y) % 2 == 0)
-            {
-                initial[i] = 2;
-            }
-        }
-
     }
-
-    node = newNode();
-    initBoard(node, initial);
-
-    node->depth = 0;
-
-    return node;
 }
 
-
-// print a board
-void printBoard( Item *node )
-{
-    assert(node);
-    printf("\n");
-    for (int j=0; j<WH_BOARD; j++) if (j==0) printf(" ___"); else printf("____"); printf("\n");
-    for (int i = 0 ; i < MAX_BOARD ; i++) {
-        if (i%WH_BOARD == 0) printf("|");
-        if (node->board[i] == 0) printf("   |");
-        else printf(" %d |", node->board[i]);
-        if (((i+1)%WH_BOARD) == 0) {
-            printf("\n");
-            for (int j=0; j<WH_BOARD; j++) if (j==0) printf(" ___"); else printf("____"); printf("\n");
+void printBoard(PawnType board[NUM_CELL][NUM_CELL]) {
+    printf("  a b c d e f g h i j\n");
+    for (int i = 0; i < NUM_CELL; i++) {
+        printf("%d ", i + 1);
+        for (int j = 0; j < NUM_CELL; j++) {
+            switch(board[i][j]) {
+                case PAWN_NULL:
+                    printf(". ");
+                    break;
+                case PAWN_WHITE:
+                    printf("w ");
+                    break;
+                case PAWN_BLACK:
+                    printf("b ");
+                    break;
+                case KING_WHITE:
+                    printf("W ");
+                    break;
+                case KING_BLACK:
+                    printf("B ");
+                    break;
+            }
         }
+        printf("\n");
     }
-    printf("\n");
 }
 
-isValidMove* isValidPosition(Item* node, int pos) {
-    int ii = pos / WH_BOARD; // Calcul de la ligne
-    int jj = pos % WH_BOARD; // Calcul de la colonne
-    isValidMove *result = (isValidMove*)malloc(sizeof(isValidMove));
-    result->count = 0;
-
-    // Vérifier si la case contient un pion blanc ou noir
-    char piece = node->board[ii * WH_BOARD + jj];
-    if (piece != 1 && piece != 2) {
-        result->isValid = 0;
-        result->result = EMPTY;
-        return result; // La case ne contient pas un pion valide
+int isValidMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int toRow, int toCol) {
+    // Vérifiez que la destination est dans les limites du plateau
+    if (toRow < 0 || toRow >= NUM_CELL || toCol < 0 || toCol >= NUM_CELL) {
+        return 0;
     }
 
-    int direction = (piece == 1) ? -1 : 1; // Direction de déplacement : blanc (-1) vers le haut, noir (+1) vers le bas
+    // Vérifiez que la destination est vide
+    if (board[toRow][toCol] != PAWN_NULL) {
+        return 0;
+    }
 
-    // Vérifier les déplacements et captures diagonales
-    if (jj > 0 && jj < WH_BOARD - 1) {
-        // Vérifier si les cases diagonales droite et gauche sont vides
-        if (ii + direction >= 0 && ii + direction < WH_BOARD) {
-            if (node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 0) {
-                result->count++;
-                result->result = MOVE_RIGHT;
-            }
-            if (node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 0) {
-                result->count++;
-                result->result = result->result == MOVE_RIGHT ? MOVE_BOTH : MOVE_LEFT;
-            }
-        }
+    // Vérifiez les mouvements valides pour les pions blancs
+    if (board[fromRow][fromCol] == PAWN_WHITE && toRow == fromRow - 1 && (toCol == fromCol - 1 || toCol == fromCol + 1)) {
+        return 1;
+    }
 
-        // Vérifier les captures pour un pion blanc
-        if (piece == 1) {
-            if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
-                (jj + 2 < WH_BOARD) &&
-                node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
-                node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
-                result->count += 3;
-                result->result = CAPTURE_RIGHT;
-            }
-            if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
-                (jj - 2 >= 0) &&
-                node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 2 &&
-                node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
-                result->count += 3;
-                result->result = result->result == CAPTURE_RIGHT ? CAPTURE_BOTH : CAPTURE_LEFT;
-            }
-        }
+    // Vérifiez les mouvements valides pour les pions noirs
+    if (board[fromRow][fromCol] == PAWN_BLACK && toRow == fromRow + 1 && (toCol == fromCol - 1 || toCol == fromCol + 1)) {
+        return 1;
+    }
 
-        // Vérifier les captures pour un pion noir
-        if (piece == 2) {
-            if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
-                (jj + 2 < WH_BOARD) &&
-                node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
-                node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
-                result->count += 3;
-                result->result = CAPTURE_RIGHT;
-            }
-            if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
-                (jj - 2 >= 0) &&
-                node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 1 &&
-                node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
-                result->count += 3;
-                result->result = result->result == CAPTURE_RIGHT ? CAPTURE_BOTH : CAPTURE_LEFT;
-            }
-        }
-    } else {
-        // Vérifier les limites de la colonne gauche
-        if (jj == 0 && ii + direction >= 0 && ii + direction < WH_BOARD) {
-            if (node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 0) {
-                result->count++;
-                result->result = MOVE_RIGHT;
-            }
+    // Ajoutez des vérifications pour les dames et les captures ici
+    if ((board[fromRow][fromCol] == PAWN_WHITE || board[fromRow][fromCol] == KING_WHITE) && toRow == fromRow - 2 &&
+        (toCol == fromCol - 2 || toCol == fromCol + 2) &&
+        board[fromRow - 1][fromCol - (fromCol - toCol) / 2] == PAWN_BLACK) {
+        return 1;
+    }
 
-            // Vérifier les captures pour un pion blanc
-            if (piece == 1) {
-                if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
-                    node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 2 &&
-                    node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
-                    result->count += 3;
-                    result->result = CAPTURE_RIGHT;
-                }
-            }
+    if ((board[fromRow][fromCol] == PAWN_BLACK || board[fromRow][fromCol] == KING_BLACK) && toRow == fromRow + 2 &&
+        (toCol == fromCol - 2 || toCol == fromCol + 2) &&
+        board[fromRow + 1][fromCol - (fromCol - toCol) / 2] == PAWN_WHITE) {
+        return 1;
+    }
 
-            // Vérifier les captures pour un pion noir
-            if (piece == 2) {
-                if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
-                    node->board[(ii + direction) * WH_BOARD + (jj + 1)] == 1 &&
-                    node->board[(ii + 2 * direction) * WH_BOARD + (jj + 2)] == 0) {
-                    result->count += 3;
-                    result->result = CAPTURE_RIGHT;
-                }
-            }
-        } else if (jj == WH_BOARD - 1 && ii + direction >= 0 && ii + direction < WH_BOARD) { // Vérifier les limites de la colonne droite
-            if (node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 0) {
-                result->count++;
-                result->result = MOVE_LEFT;
-            }
-
-            // Vérifier les captures pour un pion blanc
-            if (piece == 1) {
-                if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
-                    node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 2 &&
-                    node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
-                    result->count += 3;
-                    result->result = CAPTURE_LEFT;
-                }
-            }
-
-            // Vérifier les captures pour un pion noir
-            if (piece == 2) {
-                if ((ii + 2 * direction >= 0) && (ii + 2 * direction < WH_BOARD) &&
-                    node->board[(ii + direction) * WH_BOARD + (jj - 1)] == 1 &&
-                    node->board[(ii + 2 * direction) * WH_BOARD + (jj - 2)] == 0) {
-                    result->count += 3;
-                    result->result = CAPTURE_LEFT;
-                }
+    // Vérifiez les mouvements et captures valides pour les dames
+    if (board[fromRow][fromCol] == KING_WHITE || board[fromRow][fromCol] == KING_BLACK) {
+        int dirRow[] = {-1, -1, 1, 1};
+        int dirCol[] = {-1, 1, -1, 1};
+        for (int i = 0; i < 4; i++) {
+            int r = fromRow + dirRow[i];
+            int c = fromCol + dirCol[i];
+            while (r >= 0 && r < NUM_CELL && c >= 0 && c < NUM_CELL) {
+                if (board[r][c] != PAWN_NULL) break;
+                if (r == toRow && c == toCol) return 1;
+                r += dirRow[i];
+                c += dirCol[i];
             }
         }
     }
 
-    result->isValid = (result->count > 0) ? 1 : 0;
-
-    return result;
-}
-
-
-int isValidPositionQueen(Item* node, int pos) {
-    int ii = pos / WH_BOARD;
-    int jj = pos % WH_BOARD;
-    int count = 0;
-    // à modifier
-    for (int i=0; i<WH_BOARD; i++)
-    {
-        for (int j=0; j<WH_BOARD; j++)
-        {
-            if((abs(ii-i) == abs( jj-j))){
-                if (node->board[i*WH_BOARD+j]!=0)
-                {
-                    return 1;
-                }
-            }
-
-        }
-    }
     return 0;
 }
 
-// initialize node's state from a given board
-void initBoard(Item *node, char *board) {
-    assert( node );
-
-    node->size = MAX_BOARD;
-    node->board = calloc(MAX_BOARD, sizeof(char));
-
-    memcpy(node->board, board, MAX_BOARD * sizeof(char));
-}
-
-// Return a new item where a new queen is added at position pos if possible. NULL if not valid
-Item* getChildBoard( Item *node, int pos) {
-
-    // #TODO modif ça
-    isValidMove *result = isValidPosition(node, pos);
-
-    if (result->isValid) {
-        Item *bestChild = newNode();
-        if (bestChild == NULL)
-        {
-            return NULL;
-        }
-
-        initBoard(bestChild, node->board);
-
-        bestChild->board[pos] = 1;
-
-        // Lier l'enfant à son parent
-        bestChild->parent = node;
-        bestChild->depth = node->depth + 1;
-
-        bestChild->prev = bestChild->next = NULL;
-        bestChild->f = node->f + 1;
-        bestChild->g = bestChild->h = 0.0;
-
-//        printBoard(child_p);
-        return bestChild;
-
-
+void makeMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int toRow, int toCol) {
+    if (abs(fromRow - toRow) == 2) {
+        int capturedRow = (fromRow + toRow) / 2;
+        int capturedCol = (fromCol + toCol) / 2;
+        board[capturedRow][capturedCol] = PAWN_NULL;
     }
 
+    board[toRow][toCol] = board[fromRow][fromCol];
+    board[fromRow][fromCol] = PAWN_NULL;
 
-    return NULL;
+    // Promotion en dame
+    if (toRow == 0 && board[toRow][toCol] == PAWN_WHITE) {
+        board[toRow][toCol] = KING_WHITE;
+    }
+    if (toRow == NUM_CELL - 1 && board[toRow][toCol] == PAWN_BLACK) {
+        board[toRow][toCol] = KING_BLACK;
+    }
+}
+
+void convertCoordinate(char* coord, int* row, int* col) {
+    *col = coord[0] - 'a';
+    *row = coord[1] - '1';
+}
+
+int canCapture(PawnType board[NUM_CELL][NUM_CELL], int row, int col) {
+    Move captureMoves[4];
+    int moveCount = getCaptureMoves(board, row, col, captureMoves);
+    return moveCount > 0;
+}
+
+int getCaptureMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, Move captureMoves[]) {
+    int moveCount = 0;
+
+    if ((board[row][col] == PAWN_WHITE || board[row][col] == KING_WHITE) && row > 1) {
+        if (col > 1 && board[row - 1][col - 1] == PAWN_BLACK && board[row - 2][col - 2] == PAWN_NULL) {
+            captureMoves[moveCount++] = (Move){row, col, row - 1, col - 1, PAWN_NULL, board[row][col]};
+        }
+        if (col < NUM_CELL - 2 && board[row - 1][col + 1] == PAWN_BLACK && board[row - 2][col + 2] == PAWN_NULL) {
+            captureMoves[moveCount++] = (Move){row, col, row - 1, col + 1, PAWN_NULL, board[row][col]};
+        }
+    }
+
+    if ((board[row][col] == PAWN_BLACK || board[row][col] == KING_BLACK) && row < NUM_CELL - 2) {
+        if (col > 1 && board[row + 1][col - 1] == PAWN_WHITE && board[row + 2][col - 2] == PAWN_NULL) {
+            captureMoves[moveCount++] = (Move){row, col, row + 1, col - 1, PAWN_NULL, board[row][col]};
+        }
+        if (col < NUM_CELL - 2 && board[row + 1][col + 1] == PAWN_WHITE && board[row + 2][col + 2] == PAWN_NULL) {
+            captureMoves[moveCount++] = (Move){row, col, row + 1, col + 1, PAWN_NULL, board[row][col]};
+        }
+    }
+
+    // Ajoutez des vérifications pour les captures de dames
+    if (board[row][col] == KING_WHITE || board[row][col] == KING_BLACK) {
+        int dirRow[] = {-1, -1, 1, 1};
+        int dirCol[] = {-1, 1, -1, 1};
+        for (int i = 0; i < 4; i++) {
+            int r = row + dirRow[i];
+            int c = col + dirCol[i];
+            while (r >= 0 && r < NUM_CELL && c >= 0 && c < NUM_CELL) {
+                if (board[r][c] != PAWN_NULL) {
+                    int nextR = r + dirRow[i];
+                    int nextC = c + dirCol[i];
+                    if (nextR >= 0 && nextR < NUM_CELL && nextC >= 0 && nextC < NUM_CELL &&
+                        board[nextR][nextC] == PAWN_NULL &&
+                        ((board[row][col] == KING_WHITE && (board[r][c] == PAWN_BLACK || board[r][c] == KING_BLACK)) ||
+                         (board[row][col] == KING_BLACK && (board[r][c] == PAWN_WHITE || board[r][c] == KING_WHITE)))) {
+                        captureMoves[moveCount++] = (Move){row, col, r, c, PAWN_NULL, board[row][col]};
+                    }
+                    break;
+                }
+                r += dirRow[i];
+                c += dirCol[i];
+            }
+        }
+    }
+
+    return moveCount;
 }
