@@ -20,7 +20,7 @@ typedef enum {
 struct isValidMove {
     int isValid;
     int count;
-    list_t result;
+    int result;
 };
 typedef struct isValidMove isValidMove;
 
