@@ -37,14 +37,17 @@ Node* findBestMove(Tree* tree) {
 
 void freeTree(Tree* tree) {
     if (tree->root != NULL) {
-        // Free nodes recursively
+        for (int i = 0; i < tree->root->childCount; i++) {
+            free(tree->root->children[i]);
+        }
+        free(tree->root);
     }
     free(tree);
 }
 
 void checkLegalMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, int curPlayer, Move moves[], int* moveCount) {
     *moveCount = 0;
-    // Add moves for normal pawns
+    // Ajoute les mouvements des pions
     if (board[row][col] == PAWN_WHITE || board[row][col] == PAWN_BLACK) {
         int direction = (board[row][col] == PAWN_WHITE) ? -1 : 1;
         if (row + direction >= 0 && row + direction < NUM_CELL) {
@@ -57,8 +60,8 @@ void checkLegalMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, int c
         }
     }
 
-    // Add moves for kings
-    if (board[row][col] == KING_WHITE || board[row][col] == KING_BLACK) {
+    // Ajoute les mouvements des reines
+    if (board[row][col] == QUEEN_WHITE || board[row][col] == QUEEN_BLACK) {
         int directions[4][2] = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
         for (int i = 0; i < 4; i++) {
             int r = row + directions[i][0];
@@ -84,9 +87,9 @@ int evaluateBoard(PawnType board[NUM_CELL][NUM_CELL]) {
                 score += 1;
             } else if (board[i][j] == PAWN_BLACK) {
                 score -= 1;
-            } else if (board[i][j] == KING_WHITE) {
+            } else if (board[i][j] == QUEEN_WHITE) {
                 score += 2;
-            } else if (board[i][j] == KING_BLACK) {
+            } else if (board[i][j] == QUEEN_BLACK) {
                 score -= 2;
             }
         }
@@ -103,7 +106,7 @@ int minmax(PawnType board[NUM_CELL][NUM_CELL], int depth, int isMaximizingPlayer
         int bestValue = INT_MIN;
         for (int i = 0; i < NUM_CELL; i++) {
             for (int j = 0; j < NUM_CELL; j++) {
-                if (board[i][j] == PAWN_WHITE || board[i][j] == KING_WHITE) {
+                if (board[i][j] == PAWN_WHITE || board[i][j] == QUEEN_WHITE) {
                     Move moves[NUM_CELL * NUM_CELL];
                     int moveCount = 0;
                     checkLegalMoves(board, i, j, PAWN_WHITE, moves, &moveCount);
@@ -122,7 +125,7 @@ int minmax(PawnType board[NUM_CELL][NUM_CELL], int depth, int isMaximizingPlayer
         int bestValue = INT_MAX;
         for (int i = 0; i < NUM_CELL; i++) {
             for (int j = 0; j < NUM_CELL; j++) {
-                if (board[i][j] == PAWN_BLACK || board[i][j] == KING_BLACK) {
+                if (board[i][j] == PAWN_BLACK || board[i][j] == QUEEN_BLACK) {
                     Move moves[NUM_CELL * NUM_CELL];
                     int moveCount = 0;
                     checkLegalMoves(board, i, j, PAWN_BLACK, moves, &moveCount);
@@ -147,8 +150,8 @@ int minmax(PawnType board[NUM_CELL][NUM_CELL], int depth, int isMaximizingPlayer
     // Rechercher les mouvements de capture
     for (int i = 0; i < NUM_CELL; i++) {
         for (int j = 0; j < NUM_CELL; j++) {
-            if ((player == PAWN_WHITE && (board[i][j] == PAWN_WHITE || board[i][j] == KING_WHITE)) ||
-                (player == PAWN_BLACK && (board[i][j] == PAWN_BLACK || board[i][j] == KING_BLACK))) {
+            if ((player == PAWN_WHITE && (board[i][j] == PAWN_WHITE || board[i][j] == QUEEN_WHITE)) ||
+                (player == PAWN_BLACK && (board[i][j] == PAWN_BLACK || board[i][j] == QUEEN_BLACK))) {
                 int captures = getCaptureMoves(board, i, j, captureMoves);
                 for (int k = 0; k < captures; k++) {
                     PawnType tempBoard[NUM_CELL][NUM_CELL];
@@ -168,8 +171,8 @@ int minmax(PawnType board[NUM_CELL][NUM_CELL], int depth, int isMaximizingPlayer
     if (moveCount == 0) {
         for (int i = 0; i < NUM_CELL; i++) {
             for (int j = 0; j < NUM_CELL; j++) {
-                if ((player == PAWN_WHITE && (board[i][j] == PAWN_WHITE || board[i][j] == KING_WHITE)) ||
-                    (player == PAWN_BLACK && (board[i][j] == PAWN_BLACK || board[i][j] == KING_BLACK))) {
+                if ((player == PAWN_WHITE && (board[i][j] == PAWN_WHITE || board[i][j] == QUEEN_WHITE)) ||
+                    (player == PAWN_BLACK && (board[i][j] == PAWN_BLACK || board[i][j] == QUEEN_BLACK))) {
                     Move moves[NUM_CELL * NUM_CELL];
                     int moveCount = 0;
                     checkLegalMoves(board, i, j, player, moves, &moveCount);

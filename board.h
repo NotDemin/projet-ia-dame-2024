@@ -7,8 +7,8 @@ typedef enum {
     PAWN_NULL = -1,
     PAWN_WHITE = 0,
     PAWN_BLACK = 1,
-    KING_WHITE = 2,
-    KING_BLACK = 3
+    QUEEN_WHITE = 2,
+    QUEEN_BLACK = 3
 } PawnType;
 
 typedef struct {
@@ -25,7 +25,7 @@ void initBoard(PawnType board[NUM_CELL][NUM_CELL]);
 void printBoard(PawnType board[NUM_CELL][NUM_CELL]);
 int isValidMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int toRow, int toCol);
 void makeMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int toRow, int toCol);
-void convertCoordinate(char* coord, int* row, int* col);
+void convertCoordinate(const char* coord, int* row, int* col);
 int canCapture(PawnType board[NUM_CELL][NUM_CELL], int row, int col);
 int getCaptureMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, Move captureMoves[]);
 
