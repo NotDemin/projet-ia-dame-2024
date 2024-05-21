@@ -138,8 +138,7 @@ int minmax(PawnType board[NUM_CELL][NUM_CELL], int depth, int isMaximizingPlayer
         }
         return bestValue;
     }
-}
-Move findBestMoveAI(PawnType board[NUM_CELL][NUM_CELL], int player) {
+}Move findBestMoveAI(PawnType board[NUM_CELL][NUM_CELL], int player) {
     Move captureMoves[NUM_CELL * NUM_CELL];
     int moveCount = 0;
     Move bestMove;

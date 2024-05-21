@@ -106,14 +106,14 @@ void makeMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int 
     board[toRow][toCol] = board[fromRow][fromCol];
     board[fromRow][fromCol] = PAWN_NULL;
 
-    // Promotion en dame
-    if (toRow == 0 && board[toRow][toCol] == PAWN_WHITE) {
+    // Promotion des pions à dames si atteignent le côté opposé
+    if (board[toRow][toCol] == PAWN_WHITE && toRow == 0) {
         board[toRow][toCol] = KING_WHITE;
-    }
-    if (toRow == NUM_CELL - 1 && board[toRow][toCol] == PAWN_BLACK) {
+    } else if (board[toRow][toCol] == PAWN_BLACK && toRow == NUM_CELL - 1) {
         board[toRow][toCol] = KING_BLACK;
     }
 }
+
 
 void convertCoordinate(char* coord, int* row, int* col) {
     *col = coord[0] - 'a';
@@ -125,49 +125,47 @@ int canCapture(PawnType board[NUM_CELL][NUM_CELL], int row, int col) {
     int moveCount = getCaptureMoves(board, row, col, captureMoves);
     return moveCount > 0;
 }
-
 int getCaptureMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, Move captureMoves[]) {
     int moveCount = 0;
 
     if ((board[row][col] == PAWN_WHITE || board[row][col] == KING_WHITE) && row > 1) {
         if (col > 1 && board[row - 1][col - 1] == PAWN_BLACK && board[row - 2][col - 2] == PAWN_NULL) {
-            captureMoves[moveCount++] = (Move){row, col, row - 1, col - 1, PAWN_NULL, board[row][col]};
+            captureMoves[moveCount++] = (Move){row, col, row - 2, col - 2, row - 1, col - 1, board[row][col]};
         }
         if (col < NUM_CELL - 2 && board[row - 1][col + 1] == PAWN_BLACK && board[row - 2][col + 2] == PAWN_NULL) {
-            captureMoves[moveCount++] = (Move){row, col, row - 1, col + 1, PAWN_NULL, board[row][col]};
+            captureMoves[moveCount++] = (Move){row, col, row - 2, col + 2, row - 1, col + 1, board[row][col]};
         }
     }
 
     if ((board[row][col] == PAWN_BLACK || board[row][col] == KING_BLACK) && row < NUM_CELL - 2) {
         if (col > 1 && board[row + 1][col - 1] == PAWN_WHITE && board[row + 2][col - 2] == PAWN_NULL) {
-            captureMoves[moveCount++] = (Move){row, col, row + 1, col - 1, PAWN_NULL, board[row][col]};
+            captureMoves[moveCount++] = (Move){row, col, row + 2, col - 2, row + 1, col - 1, board[row][col]};
         }
         if (col < NUM_CELL - 2 && board[row + 1][col + 1] == PAWN_WHITE && board[row + 2][col + 2] == PAWN_NULL) {
-            captureMoves[moveCount++] = (Move){row, col, row + 1, col + 1, PAWN_NULL, board[row][col]};
+            captureMoves[moveCount++] = (Move){row, col, row + 2, col + 2, row + 1, col + 1, board[row][col]};
         }
     }
 
-    // Ajoutez des vérifications pour les captures de dames
+    // Ajout des captures pour les dames
+    int directions[4][2] = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
     if (board[row][col] == KING_WHITE || board[row][col] == KING_BLACK) {
-        int dirRow[] = {-1, -1, 1, 1};
-        int dirCol[] = {-1, 1, -1, 1};
         for (int i = 0; i < 4; i++) {
-            int r = row + dirRow[i];
-            int c = col + dirCol[i];
+            int r = row + directions[i][0];
+            int c = col + directions[i][1];
             while (r >= 0 && r < NUM_CELL && c >= 0 && c < NUM_CELL) {
                 if (board[r][c] != PAWN_NULL) {
-                    int nextR = r + dirRow[i];
-                    int nextC = c + dirCol[i];
-                    if (nextR >= 0 && nextR < NUM_CELL && nextC >= 0 && nextC < NUM_CELL &&
-                        board[nextR][nextC] == PAWN_NULL &&
-                        ((board[row][col] == KING_WHITE && (board[r][c] == PAWN_BLACK || board[r][c] == KING_BLACK)) ||
-                         (board[row][col] == KING_BLACK && (board[r][c] == PAWN_WHITE || board[r][c] == KING_WHITE)))) {
-                        captureMoves[moveCount++] = (Move){row, col, r, c, PAWN_NULL, board[row][col]};
+                    if ((board[row][col] == KING_WHITE && (board[r][c] == PAWN_BLACK || board[r][c] == KING_BLACK)) ||
+                        (board[row][col] == KING_BLACK && (board[r][c] == PAWN_WHITE || board[r][c] == KING_WHITE))) {
+                        int nextR = r + directions[i][0];
+                        int nextC = c + directions[i][1];
+                        if (nextR >= 0 && nextR < NUM_CELL && nextC >= 0 && nextC < NUM_CELL && board[nextR][nextC] == PAWN_NULL) {
+                            captureMoves[moveCount++] = (Move){row, col, nextR, nextC, r, c, board[row][col]};
+                        }
                     }
                     break;
                 }
-                r += dirRow[i];
-                c += dirCol[i];
+                r += directions[i][0];
+                c += directions[i][1];
             }
         }
     }
