@@ -14,9 +14,10 @@ typedef enum {
 typedef struct {
     int row;
     int col;
+    int toRow;
+    int toCol;
     int eatenrow;
     int eatencol;
-    int move;
     PawnType type;
 } Move;
 

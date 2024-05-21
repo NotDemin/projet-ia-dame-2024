@@ -24,7 +24,7 @@ int main() {
                 int captureCount = getCaptureMoves(board, fromRow, fromCol, captureMoves);
                 int validCapture = 0;
                 for (int i = 0; i < captureCount; i++) {
-                    if (captureMoves[i].row + 2 * (captureMoves[i].eatenrow - captureMoves[i].row) == toRow && captureMoves[i].col + 2 * (captureMoves[i].eatencol - captureMoves[i].col) == toCol) {
+                    if (captureMoves[i].toRow == toRow && captureMoves[i].toCol == toCol) {
                         validCapture = 1;
                         break;
                     }
@@ -43,13 +43,7 @@ int main() {
         } else {
             printf("Black's turn (AI)...\n");
             Move bestMove = findBestMoveAI(board, curPlayer);
-            if (canCapture(board, bestMove.row, bestMove.col)) {
-                int toRow = bestMove.row + 2 * (bestMove.eatenrow - bestMove.row);
-                int toCol = bestMove.col + 2 * (bestMove.eatencol - bestMove.col);
-                makeMove(board, bestMove.row, bestMove.col, toRow, toCol);
-            } else {
-                makeMove(board, bestMove.row, bestMove.col, bestMove.row + 1, bestMove.col + 1);
-            }
+            makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
             curPlayer = PAWN_WHITE;
         }
     }
