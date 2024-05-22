@@ -90,7 +90,7 @@ void makeMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int 
     }
 }
 
-void convertCoordinate(char* coord, int* row, int* col) {
+void convertCoordinate(const char* coord, int* row, int* col) {
     *col = coord[0] - 'a';
     *row = coord[1] - '1';
 }

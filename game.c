@@ -105,52 +105,102 @@ int isGameOver(PawnType board[NUM_CELL][NUM_CELL]) {
     }
 }
 
-int minmax(PawnType board[NUM_CELL][NUM_CELL], int depth, int maximizingPlayer, Move *bestMove) {
+int minmax(PawnType board[NUM_CELL][NUM_CELL], int depth, int isMaximizingPlayer) {
     if (depth == 0) {
         return evaluateBoard(board);
     }
 
-    int bestRating = maximizingPlayer ? INT_MIN : INT_MAX;
-    Move legalMoves[NUM_CELL * NUM_CELL];
-    int moveCount = 0;
-
-    for (int i = 0; i < NUM_CELL; i++) {
-        for (int j = 0; j < NUM_CELL; j++) {
-            if (board[i][j] != PAWN_NULL && board[i][j] % 2 == maximizingPlayer) {
-                checkLegalMoves(board, i, j, maximizingPlayer, legalMoves, &moveCount);
-            }
-        }
-    }
-
-    for (int i = 0; i < moveCount; i++) {
-        PawnType tempBoard[NUM_CELL][NUM_CELL];
-        memcpy(tempBoard, board, sizeof(PawnType) * NUM_CELL * NUM_CELL);
-        makeMove(tempBoard, legalMoves[i].row, legalMoves[i].col, legalMoves[i].toRow, legalMoves[i].toCol);
-
-        int rating = minimax(tempBoard, depth - 1, !maximizingPlayer, NULL);
-
-        if (maximizingPlayer) {
-            if (rating > bestRating) {
-                bestRating = rating;
-                if (bestMove) {
-                    *bestMove = legalMoves[i];
-                }
-            }
-        } else {
-            if (rating < bestRating) {
-                bestRating = rating;
-                if (bestMove) {
-                    *bestMove = legalMoves[i];
+    if (isMaximizingPlayer) {
+        int bestValue = INT_MIN;
+        for (int i = 0; i < NUM_CELL; i++) {
+            for (int j = 0; j < NUM_CELL; j++) {
+                if (board[i][j] == PAWN_WHITE || board[i][j] == QUEEN_WHITE) {
+                    Move moves[NUM_CELL * NUM_CELL];
+                    int moveCount = 0;
+                    checkLegalMoves(board, i, j, PAWN_WHITE, moves, &moveCount);
+                    for (int k = 0; k < moveCount; k++) {
+                        PawnType tempBoard[NUM_CELL][NUM_CELL];
+                        memcpy(tempBoard, board, sizeof(PawnType) * NUM_CELL * NUM_CELL);
+                        makeMove(tempBoard, moves[k].row, moves[k].col, moves[k].toRow, moves[k].toCol);
+                        int value = minmax(tempBoard, depth - 1, 0);
+                        bestValue = (value > bestValue) ? value : bestValue;
+                    }
                 }
             }
         }
+        return bestValue;
+    } else {
+        int bestValue = INT_MAX;
+        for (int i = 0; i < NUM_CELL; i++) {
+            for (int j = 0; j < NUM_CELL; j++) {
+                if (board[i][j] == PAWN_BLACK || board[i][j] == QUEEN_BLACK) {
+                    Move moves[NUM_CELL * NUM_CELL];
+                    int moveCount = 0;
+                    checkLegalMoves(board, i, j, PAWN_BLACK, moves, &moveCount);
+                    for (int k = 0; k < moveCount; k++) {
+                        PawnType tempBoard[NUM_CELL][NUM_CELL];
+                        memcpy(tempBoard, board, sizeof(PawnType) * NUM_CELL * NUM_CELL);
+                        makeMove(tempBoard, moves[k].row, moves[k].col, moves[k].toRow, moves[k].toCol);
+                        int value = minmax(tempBoard, depth - 1, 1);
+                        bestValue = (value < bestValue) ? value : bestValue;
+                    }
+                }
+            }
+        }
+        return bestValue;
     }
-    return bestRating;
 }
 
 Move findBestMoveAI(PawnType board[NUM_CELL][NUM_CELL], int player) {
-
+    Move captureMoves[NUM_CELL * NUM_CELL];
+    int moveCount = 0;
     Move bestMove;
-    minimax(board, SEARCH_DEPTH, player, &bestMove);
+    int bestRating = (player == PAWN_WHITE) ? INT_MIN : INT_MAX;
+
+    // Rechercher les mouvements de capture
+    for (int i = 0; i < NUM_CELL; i++) {
+        for (int j = 0; j < NUM_CELL; j++) {
+            if ((player == PAWN_WHITE && (board[i][j] == PAWN_WHITE || board[i][j] == QUEEN_WHITE)) ||
+                (player == PAWN_BLACK && (board[i][j] == PAWN_BLACK || board[i][j] == QUEEN_BLACK))) {
+                int captures = getCaptureMoves(board, i, j, captureMoves);
+                for (int k = 0; k < captures; k++) {
+                    PawnType tempBoard[NUM_CELL][NUM_CELL];
+                    memcpy(tempBoard, board, sizeof(PawnType) * NUM_CELL * NUM_CELL);
+                    makeMove(tempBoard, captureMoves[k].row, captureMoves[k].col, captureMoves[k].toRow, captureMoves[k].toCol);
+                    int rating = evaluateBoard(tempBoard);
+                    if ((player == PAWN_WHITE && rating > bestRating) ||
+                        (player == PAWN_BLACK && rating < bestRating)) {
+                        moveCount = 1;
+                        bestRating = rating;
+                        bestMove = captureMoves[k];
+                    }
+                }
+            }
+        }
+    }
+    // Si aucun mouvement de capture n'est disponible, choisir un mouvement ordinaire
+    if (moveCount == 0) {
+        for (int i = 0; i < NUM_CELL; i++) {
+            for (int j = 0; j < NUM_CELL; j++) {
+                if ((player == PAWN_WHITE && (board[i][j] == PAWN_WHITE || board[i][j] == QUEEN_WHITE)) ||
+                    (player == PAWN_BLACK && (board[i][j] == PAWN_BLACK || board[i][j] == QUEEN_BLACK))) {
+                    Move moves[NUM_CELL * NUM_CELL];
+                    int moveCount = 0;
+                    checkLegalMoves(board, i, j, player, moves, &moveCount);
+                    for (int k = 0; k < moveCount; k++) {
+                        PawnType tempBoard[NUM_CELL][NUM_CELL];
+                        memcpy(tempBoard, board, sizeof(PawnType) * NUM_CELL * NUM_CELL);
+                        makeMove(tempBoard, moves[k].row, moves[k].col, moves[k].toRow, moves[k].toCol);
+                        int rating = evaluateBoard(tempBoard);
+                        if ((player == PAWN_WHITE && rating > bestRating) ||
+                            (player == PAWN_BLACK && rating < bestRating)) {
+                            bestRating = rating;
+                            bestMove = moves[k];
+                        }
+                    }
+                }
+            }
+        }
+    }
     return bestMove;
 }

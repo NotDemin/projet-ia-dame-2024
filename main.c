@@ -4,12 +4,12 @@
 #include <stdio.h>
 
 void getPlayerMove(char* from, char* to) {
-    printf("White's turn. Enter move (e.g., a3 b4): ");
+    printf("Entrer un coup: (ex: a3 b4): ");
     scanf("%s %s", from, to);
 }
 
 void handleAIMove(PawnType board[NUM_CELL][NUM_CELL], int curPlayer) {
-    printf("%s's turn (AI)...\n", curPlayer == PAWN_WHITE ? "White" : "Black");
+    printf("Tour des %s\n", curPlayer == PAWN_WHITE ? "Blanc" : "Noir");
     Move bestMove = findBestMoveAI(board, curPlayer);
     makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
 }
@@ -50,7 +50,7 @@ int main() {
                     }
                 }
                 if (!validCapture) {
-                    printf("You must capture the available piece(s).\n");
+                    printf("La prise est obligatoire.\n");
                     continue;
                 }
             } else {
@@ -66,17 +66,18 @@ int main() {
                 }
 
                 if (anyCapture) {
-                    printf("You must capture the available piece(s).\n");
+                    printf("La prise est obligatoire.\n");
                     continue;
                 }
 
                 if (!isValidMove(board, fromRow, fromCol, toRow, toCol)) {
-                    printf("Invalid move. Try again.\n");
+                    printf("Coup invalide, re essayer.\n");
                     continue;
                 }
             }
 
             makeMove(board, fromRow, fromCol, toRow, toCol);
+            curPlayer = PAWN_BLACK;
         } else {
             printf("Tour des noirs (IA)...\n");
             Move bestMove = findBestMoveAI(board, curPlayer);
@@ -102,10 +103,10 @@ int main() {
             }
 
             makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
+//            handleAIMove(board, curPlayer);
             curPlayer = PAWN_WHITE;
-            handleAIMove(board, curPlayer);
         }
-        curPlayer = (curPlayer == PAWN_WHITE) ? PAWN_BLACK : PAWN_WHITE;
+//        curPlayer = (curPlayer == PAWN_WHITE) ? PAWN_BLACK : PAWN_WHITE;
     }
 
 
