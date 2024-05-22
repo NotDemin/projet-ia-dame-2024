@@ -16,8 +16,8 @@ typedef struct {
     int col;
     int toRow;
     int toCol;
-    int eatenrow;
-    int eatencol;
+    int capturedRow;
+    int capturedCol;
     PawnType type;
 } Move;
 
@@ -28,5 +28,7 @@ void makeMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int 
 void convertCoordinate(const char* coord, int* row, int* col);
 int canCapture(PawnType board[NUM_CELL][NUM_CELL], int row, int col);
 int getCaptureMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, Move captureMoves[]);
+int hasNoPawns(PawnType board[NUM_CELL][NUM_CELL], int player);
+int checkWinner(PawnType board[NUM_CELL][NUM_CELL]);
 
 #endif // BOARD_H
