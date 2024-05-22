@@ -2,6 +2,8 @@
 #include "board.h"
 #include "game.h"
 #include <stdio.h>
+#include <SFML/Graphics.hpp>
+#include <string.h>
 
 void getPlayerMove(char* from, char* to) {
     printf("Entrer un coup: (ex: a3 b4): ");
@@ -14,13 +16,19 @@ void handleAIMove(PawnType board[NUM_CELL][NUM_CELL], int curPlayer) {
     makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
 }
 
-int main() {
+int playGameCLI() {
     PawnType board[NUM_CELL][NUM_CELL];
     initBoard(board);
 
     int gameMode;
     printf("Choisissez le mode de jeu:\n1. Joueur contre IA\n2. IA contre IA\n");
     scanf("%d", &gameMode);
+
+    // sanitize gamem ode
+    if (gameMode != 1 && gameMode != 2) {
+        gameMode = 1;
+    }
+    printf("Mode de jeu: %d\n", gameMode);
 
     int curPlayer = PAWN_WHITE;
     char from[3], to[3];
@@ -118,6 +126,71 @@ int main() {
 
     printBoard(board);
     printf("Le gagnant est : %s\n", checkWinner(board) == PAWN_WHITE ? "Blanc" : "Noir");
+
+    return 0;
+}
+
+int playGameGUI() {
+    sf::RenderWindow window(sf::VideoMode(800, 800), "Jeu de dames");
+
+    // on dessine la grille en 10x10
+    sf::VertexArray hlines = sf::VertexArray(sf::Lines, 20);
+    sf::VertexArray vlines = sf::VertexArray(sf::Lines, 20);
+
+    for (int i = 0; i < (int)hlines.getVertexCount(); i += 2) {
+        hlines[i].position = sf::Vector2f(0, i * 800 / hlines.getVertexCount());
+        hlines[i + 1].position = sf::Vector2f(800, i * 800 / hlines.getVertexCount());
+    }
+
+    for (int i = 0; i < (int)vlines.getVertexCount(); i += 2) {
+        vlines[i].position = sf::Vector2f(i * 800 / vlines.getVertexCount(), 0);
+        vlines[i + 1].position = sf::Vector2f(i * 800 / vlines.getVertexCount(), 800);
+    }
+
+    while (window.isOpen())
+    {
+        sf::Event event{};
+        while (window.pollEvent(event)) {
+
+            switch (event.type) {
+
+                case (sf::Event::Closed): {
+                    window.close();
+                    break;
+                }
+
+                case (sf::Event::KeyPressed): {
+
+                }
+
+                case (sf::Event::MouseButtonPressed): {
+
+
+                    break;
+
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+
+        window.clear();
+
+        window.draw(hlines);
+        window.draw(vlines);
+
+        window.display();
+    }
+    return 0;
+}
+
+int main(int argc, char* argv[]) {
+    if (argc == 2 && strcmp(argv[1], "-gui") == 0) {
+        playGameGUI();
+    } else {
+        playGameCLI();
+    }
 
     return 0;
 }
