@@ -5,6 +5,8 @@
 #include <cstring>
 #include <sstream>
 #include <iostream>
+#include <vector>
+#include <thread>
 
 // Taille du damier
 const int BOARD_SIZE = 800;
@@ -70,14 +72,6 @@ int playGameCLI() {
     initBoard(board);
 
     int gameMode = 1;
-//    printf("Choisissez le mode de jeu:\n1. Joueur contre IA\n2. IA contre IA\n");
-//    scanf("%d", &gameMode);
-
-//    // sanitize gamem ode
-//    if (gameMode != 1 && gameMode != 2) {
-//        gameMode = 1;
-//    }
-//    printf("Mode de jeu: %d\n", gameMode);
 
     int curPlayer = PAWN_WHITE;
     char from[3], to[3];
@@ -166,12 +160,9 @@ int playGameCLI() {
             }
 
             makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
-//            handleAIMove(board, curPlayer);
             curPlayer = PAWN_WHITE;
         }
-//        curPlayer = (curPlayer == PAWN_WHITE) ? PAWN_BLACK : PAWN_WHITE;
     }
-
 
     printBoard(board);
     printf("Le gagnant est : %s\n", checkWinner(board) == PAWN_WHITE ? "Blanc" : "Noir");
@@ -188,7 +179,7 @@ int playGameGUI() {
     int movesCounter = 0;
     std::vector<std::string> moves;
 
-    // Initialisation d'une variable permettant de savoir a qui c'est le tour
+    // Initialisation d'une variable permettant de savoir à qui c'est le tour
     int curPlayer = PAWN_WHITE;
 
     while (window.isOpen()) {
@@ -213,16 +204,30 @@ int playGameGUI() {
                     }
 
                     if (curPlayer == PAWN_WHITE) {
-                        // On récupère la lettre correspondant a x
-                        char letter = 'a' + x;
+                        if (movesCounter % 2 == 0) {
+                            // Le coup est valide si la case cliquée est un pion blanc
+                            if (board[y][x] == PAWN_WHITE || board[y][x] == QUEEN_WHITE) {
+                                // Obtention de la lettre correspondante pour x
+                                char letter = 'a' + x;
 
-                        // on récupère les coordonnées convertis en case
-                        // et le premier et deuxieme coup
-                        std::stringstream ss;
-                        ss << letter << y + 1;
-                        moves.push_back(ss.str());
+                                // Conversion des coordonnées en positions du tableau
+                                std::stringstream ss;
+                                ss << letter << y + 1;
+                                moves.push_back(ss.str());
 
-                        if (movesCounter % 2 != 0) {
+                                movesCounter++;
+                            } else {
+                                printf("La première case cliquée n'est pas un pion blanc. Veuillez réessayer.\n");
+                            }
+                        } else {
+                            // Obtention de la lettre correspondante pour x
+                            char letter = 'a' + x;
+
+                            // Conversion des coordonnées en positions du tableau
+                            std::stringstream ss;
+                            ss << letter << y + 1;
+                            moves.push_back(ss.str());
+
                             std::string from = moves[moves.size() - 2];
                             std::string to = moves[moves.size() - 1];
 
@@ -241,6 +246,7 @@ int playGameGUI() {
                                 }
                                 if (!validCapture) {
                                     printf("La prise est obligatoire.\n");
+                                    moves.pop_back();
                                     continue;
                                 }
                             } else {
@@ -257,11 +263,13 @@ int playGameGUI() {
 
                                 if (anyCapture) {
                                     printf("La prise est obligatoire.\n");
+                                    moves.pop_back();
                                     continue;
                                 }
 
                                 if (!isValidMove(board, fromRow, fromCol, toRow, toCol)) {
                                     printf("Coup invalide, veuillez jouer un autre coup.\n");
+                                    moves.pop_back();
                                     continue;
                                 }
                             }
@@ -269,14 +277,14 @@ int playGameGUI() {
                             makeMove(board, fromRow, fromCol, toRow, toCol);
                             curPlayer = PAWN_BLACK;
 
-                            // Introduce a delay before AI makes a move
+                            // Délai de 1 seconde avant de laisser l'IA jouer
                             window.clear();
                             drawBoard(window);
                             drawPawns(window, board);
                             window.display();
-                            sf::sleep(sf::milliseconds(1000)); // 1-second delay
+                            sf::sleep(sf::milliseconds(1000)); // Une seconde de délai
+                            movesCounter++;
                         }
-                        movesCounter++;
                     }
                     break;
                 }
@@ -298,7 +306,7 @@ int playGameGUI() {
                         break;
                     }
                 }
-                // on force l'ia a prendre si possible
+                // on force l'IA à prendre si possible
                 if (!validCapture) {
                     bestMove = captureMoves[0];
                 }
