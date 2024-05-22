@@ -213,7 +213,7 @@ int playGameGUI() {
                     }
 
                     if (curPlayer == PAWN_WHITE) {
-                        // on récup la lettre correspond a x
+                        // On récupère la lettre correspondant a x
                         char letter = 'a' + x;
 
                         // on récupère les coordonnées convertis en case
@@ -268,6 +268,13 @@ int playGameGUI() {
 
                             makeMove(board, fromRow, fromCol, toRow, toCol);
                             curPlayer = PAWN_BLACK;
+
+                            // Introduce a delay before AI makes a move
+                            window.clear();
+                            drawBoard(window);
+                            drawPawns(window, board);
+                            window.display();
+                            sf::sleep(sf::milliseconds(1000)); // 1-second delay
                         }
                         movesCounter++;
                     }
