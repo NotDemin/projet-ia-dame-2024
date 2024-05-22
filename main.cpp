@@ -193,6 +193,7 @@ int playGameGUI() {
                 }
                 case sf::Event::MouseButtonPressed: {
                     int fromRow, fromCol, toRow, toCol;
+                    int prisePion = 0;
                     if (checkWinner(board) != PAWN_NULL) break;
 
                     int x = event.mouseButton.x / CELL_SIZE;
@@ -235,6 +236,7 @@ int playGameGUI() {
                             convertCoordinate(to.c_str(), &toRow, &toCol);
 
                             if (canCapture(board, fromRow, fromCol)) {
+                            prisePion = 1;
                                 Move captureMoves[NUM_CELL * NUM_CELL];
                                 int captureCount = getCaptureMoves(board, fromRow, fromCol, captureMoves);
                                 int validCapture = 0;
@@ -278,6 +280,10 @@ int playGameGUI() {
                             }
 
                             makeMove(board, fromRow, fromCol, toRow, toCol);
+
+                            if (canCapture(board, toRow, toCol) && prisePion == 1) {
+                                printf("Une autre prise est possible. Jouez la prise obligatoire.\n");
+                            } else {
                             curPlayer = PAWN_BLACK;
 
                             // Délai de 1 seconde avant de laisser l'IA jouer
@@ -287,6 +293,7 @@ int playGameGUI() {
                             window.display();
                             sf::sleep(sf::milliseconds(1000)); // Une seconde de délai
                             movesCounter++;
+                            }
                         }
                     }
                     break;
