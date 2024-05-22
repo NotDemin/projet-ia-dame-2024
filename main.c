@@ -49,6 +49,27 @@ int main() {
         } else {
             printf("Tour des noirs (IA)...\n");
             Move bestMove = findBestMoveAI(board, curPlayer);
+            if (canCapture(board, bestMove.row, bestMove.col)) {
+                Move captureMoves[NUM_CELL * NUM_CELL];
+                int captureCount = getCaptureMoves(board, bestMove.row, bestMove.col, captureMoves);
+                int validCapture = 0;
+                for (int i = 0; i < captureCount; i++) {
+                    if (captureMoves[i].toRow == bestMove.toRow && captureMoves[i].toCol == bestMove.toCol) {
+                        validCapture = 1;
+                        break;
+                    }
+                }
+                // on force l'ia a prendre si possible
+                if (validCapture) {
+                    makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
+                } else {
+                    // si l'ia n'a pas choisis le coup de capture
+                    // on modifie le bestmove
+                    bestMove = captureMoves[0];
+                    makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
+                }
+            }
+
             makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
             curPlayer = PAWN_WHITE;
         }
