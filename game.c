@@ -83,28 +83,6 @@ int evaluateBoard(PawnType board[NUM_CELL][NUM_CELL]) {
     return score;
 }
 
-int isGameOver(PawnType board[NUM_CELL][NUM_CELL]) {
-    for (int i = 0; i < NUM_CELL; i++) {
-        for (int j = 0; j < NUM_CELL; j++) {
-            if (board[i][j] == PAWN_WHITE || board[i][j] == QUEEN_WHITE) {
-                Move moves[NUM_CELL * NUM_CELL];
-                int moveCount = 0;
-                checkLegalMoves(board, i, j, PAWN_WHITE, moves, &moveCount);
-                if (moveCount > 0) {
-                    return 0;
-                }
-            } else if (board[i][j] == PAWN_BLACK || board[i][j] == QUEEN_BLACK) {
-                Move moves[NUM_CELL * NUM_CELL];
-                int moveCount = 0;
-                checkLegalMoves(board, i, j, PAWN_BLACK, moves, &moveCount);
-                if (moveCount > 0) {
-                    return 0;
-                }
-            }
-        }
-    }
-}
-
 int minmax(PawnType board[NUM_CELL][NUM_CELL], int depth, int isMaximizingPlayer) {
     if (depth == 0) {
         return evaluateBoard(board);

@@ -29,11 +29,6 @@ int main() {
     while (checkWinner(board) == PAWN_NULL) {
         printBoard(board);
 
-        if (isGameOver(board)) {
-            printf("Partie terminée.\n");
-            break;
-        }
-
         if (curPlayer == PAWN_WHITE && gameMode == 1) {
             getPlayerMove(from, to);
             convertCoordinate(from, &fromRow, &fromCol);
@@ -94,7 +89,6 @@ int main() {
                 // on force l'ia a prendre si possible
                 if (!validCapture) {
                     bestMove = captureMoves[0];
-                    continue;
                 }
             } else {
                 int anyCapture = 0;
@@ -110,9 +104,7 @@ int main() {
 
                 if (anyCapture) {
                     Move captureMoves[NUM_CELL * NUM_CELL];
-                    int captureCount = getCaptureMoves(board, bestMove.row, bestMove.col, captureMoves);
                     bestMove = captureMoves[0];
-                    continue;
                 }
             }
 
