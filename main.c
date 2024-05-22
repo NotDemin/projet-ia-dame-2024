@@ -14,6 +14,11 @@ int main() {
     while (true) {
         printBoard(board);
 
+        if (isGameOver(board)) {
+            printf("Partie terminée.\n");
+            break;
+        }
+
         if (curPlayer == PAWN_WHITE) {
             printf("Tour des blancs, entrer un coup: ");
             scanf("%s %s", from, to);
