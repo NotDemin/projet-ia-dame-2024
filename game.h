@@ -25,5 +25,6 @@ void freeTree(Tree* tree);
 void checkLegalMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, int curPlayer, Move moves[], int* moveCount);
 int evaluateBoard(PawnType board[NUM_CELL][NUM_CELL]);
 Move findBestMoveAI(PawnType board[NUM_CELL][NUM_CELL], int player);
+int minimax(PawnType board[NUM_CELL][NUM_CELL], int depth, int maximizingPlayer, Move *bestMove);
 
 #endif // GAME_H
