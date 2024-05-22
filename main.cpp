@@ -188,6 +188,9 @@ int playGameGUI() {
     int movesCounter = 0;
     std::vector<std::string> moves;
 
+    // Initialisation d'une variable permettant de savoir a qui c'est le tour
+    int curPlayer = PAWN_WHITE;
+
     while (window.isOpen()) {
         sf::Event event{};
 
@@ -209,82 +212,109 @@ int playGameGUI() {
                         break;
                     }
 
-                    // on récup le type de pion
-                    // pour le debug en soit
-                    // if (board[y][x] == PAWN_WHITE || board[y][x] == QUEEN_WHITE) {
-                    //     printf("Clic sur un pion blanc\n");
-                    // } else if (board[y][x] == PAWN_BLACK || board[y][x] == QUEEN_BLACK) {
-                    //     printf("Clic sur un pion noir\n");
-                    // } else {
-                    //     printf("Clic sur une case vide\n");
-                    // }
+                    if (curPlayer == PAWN_WHITE) {
+                        // on récup la lettre correspond a x
+                        char letter = 'a' + x;
 
-                    // on récup la lettre correspond a x
-                    char letter = 'a' + x;
+                        // on récupère les coordonnées convertis en case
+                        // et le premier et deuxieme coup
+                        std::stringstream ss;
+                        ss << letter << y + 1;
+                        moves.push_back(ss.str());
 
-                    // on récupère les coordonnées convertis en case
-                    // et le premier et deuxieme coup
-                    std::stringstream ss;
-                    ss << letter << y + 1;
-                    moves.push_back(ss.str());
+                        if (movesCounter % 2 != 0) {
+                            std::string from = moves[moves.size() - 2];
+                            std::string to = moves[moves.size() - 1];
 
-                    std::cout << movesCounter << std::endl;
-                    if (movesCounter-1 % 2 == 0/* && movesCounter != 0*/) {
-                        std::string from = moves[moves.size() - 2];
-                        std::string to = moves[moves.size() - 1];
+                            convertCoordinate(from.c_str(), &fromRow, &fromCol);
+                            convertCoordinate(to.c_str(), &toRow, &toCol);
 
-                        std::cout << "From: " << from << " To: " << to << std::endl;
-
-                        convertCoordinate(from.c_str(), &fromRow, &fromCol);
-                        convertCoordinate(to.c_str(), &toRow, &toCol);
-
-                        printf("From: %s To: %s\n", from.c_str(), to.c_str());
-                        if (canCapture(board, fromRow, fromCol)) {
-                            Move captureMoves[NUM_CELL * NUM_CELL];
-                            int captureCount = getCaptureMoves(board, fromRow, fromCol, captureMoves);
-                            int validCapture = 0;
-                            for (int i = 0; i < captureCount; i++) {
-                                if (captureMoves[i].toRow == toRow && captureMoves[i].toCol == toCol) {
-                                    validCapture = 1;
-                                    break;
-                                }
-                            }
-                            if (!validCapture) {
-                                printf("La prise est obligatoire.\n");
-                                continue;
-                            }
-                        } else {
-                            int anyCapture = 0;
-                            for (int i = 0; i < NUM_CELL; i++) {
-                                for (int j = 0; j < NUM_CELL; j++) {
-                                    if (board[i][j] == PAWN_WHITE && canCapture(board, i, j)) {
-                                        anyCapture = 1;
+                            if (canCapture(board, fromRow, fromCol)) {
+                                Move captureMoves[NUM_CELL * NUM_CELL];
+                                int captureCount = getCaptureMoves(board, fromRow, fromCol, captureMoves);
+                                int validCapture = 0;
+                                for (int i = 0; i < captureCount; i++) {
+                                    if (captureMoves[i].toRow == toRow && captureMoves[i].toCol == toCol) {
+                                        validCapture = 1;
                                         break;
                                     }
                                 }
-                                if (anyCapture) break;
+                                if (!validCapture) {
+                                    printf("La prise est obligatoire.\n");
+                                    continue;
+                                }
+                            } else {
+                                int anyCapture = 0;
+                                for (int i = 0; i < NUM_CELL; i++) {
+                                    for (int j = 0; j < NUM_CELL; j++) {
+                                        if (board[i][j] == PAWN_WHITE && canCapture(board, i, j)) {
+                                            anyCapture = 1;
+                                            break;
+                                        }
+                                    }
+                                    if (anyCapture) break;
+                                }
+
+                                if (anyCapture) {
+                                    printf("La prise est obligatoire.\n");
+                                    continue;
+                                }
+
+                                if (!isValidMove(board, fromRow, fromCol, toRow, toCol)) {
+                                    printf("Coup invalide, veuillez jouer un autre coup.\n");
+                                    continue;
+                                }
                             }
 
-                            if (anyCapture) {
-                                printf("La prise est obligatoire.\n");
-                                continue;
-                            }
-
-                            if (!isValidMove(board, fromRow, fromCol, toRow, toCol)) {
-                                printf("Coup invalide, re essayer.\n");
-                                continue;
-                            }
+                            makeMove(board, fromRow, fromCol, toRow, toCol);
+                            curPlayer = PAWN_BLACK;
                         }
-
-                        makeMove(board, fromRow, fromCol, toRow, toCol);
+                        movesCounter++;
                     }
-                    movesCounter++;
-
                     break;
                 }
                 default:
                     break;
             }
+        }
+
+        if (curPlayer == PAWN_BLACK && checkWinner(board) == PAWN_NULL) {
+            printf("Tour des noirs (IA)...\n");
+            Move bestMove = findBestMoveAI(board, curPlayer);
+            if (canCapture(board, bestMove.row, bestMove.col)) {
+                Move captureMoves[NUM_CELL * NUM_CELL];
+                int captureCount = getCaptureMoves(board, bestMove.row, bestMove.col, captureMoves);
+                int validCapture = 0;
+                for (int i = 0; i < captureCount; i++) {
+                    if (captureMoves[i].toRow == bestMove.toRow && captureMoves[i].toCol == bestMove.toCol) {
+                        validCapture = 1;
+                        break;
+                    }
+                }
+                // on force l'ia a prendre si possible
+                if (!validCapture) {
+                    bestMove = captureMoves[0];
+                }
+            } else {
+                int anyCapture = 0;
+                for (int i = 0; i < NUM_CELL; i++) {
+                    for (int j = 0; j < NUM_CELL; j++) {
+                        if (board[i][j] == PAWN_BLACK && canCapture(board, i, j)) {
+                            anyCapture = 1;
+                            break;
+                        }
+                    }
+                    if (anyCapture) break;
+                }
+
+                if (anyCapture) {
+                    Move captureMoves[NUM_CELL * NUM_CELL];
+                    bestMove = captureMoves[0];
+                }
+            }
+
+            makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
+            curPlayer = PAWN_WHITE;
         }
 
         window.clear();
