@@ -246,7 +246,8 @@ int playGameGUI() {
                                 }
                                 if (!validCapture) {
                                     printf("La prise est obligatoire.\n");
-                                    moves.pop_back();
+                                    // Faire en sorte qu'on ai un nombre impair de coups pour rejouer le premier coup
+                                    movesCounter++;
                                     continue;
                                 }
                             } else {
@@ -263,13 +264,15 @@ int playGameGUI() {
 
                                 if (anyCapture) {
                                     printf("La prise est obligatoire.\n");
-                                    moves.pop_back();
+                                    // Faire en sorte qu'on ai un nombre impair de coups pour rejouer le premier coup
+                                    movesCounter++;
                                     continue;
                                 }
 
                                 if (!isValidMove(board, fromRow, fromCol, toRow, toCol)) {
                                     printf("Coup invalide, veuillez jouer un autre coup.\n");
-                                    moves.pop_back();
+                                    // Faire en sorte qu'on ai un nombre impair de coups pour rejouer le premier coup
+                                    movesCounter++;
                                     continue;
                                 }
                             }
