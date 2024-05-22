@@ -92,13 +92,27 @@ int main() {
                     }
                 }
                 // on force l'ia a prendre si possible
-                if (validCapture) {
-                    makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
-                } else {
-                    // si l'ia n'a pas choisis le coup de capture
-                    // on modifie le bestmove
+                if (!validCapture) {
                     bestMove = captureMoves[0];
-                    makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
+                    continue;
+                }
+            } else {
+                int anyCapture = 0;
+                for (int i = 0; i < NUM_CELL; i++) {
+                    for (int j = 0; j < NUM_CELL; j++) {
+                        if (board[i][j] == PAWN_BLACK && canCapture(board, i, j)) {
+                            anyCapture = 1;
+                            break;
+                        }
+                    }
+                    if (anyCapture) break;
+                }
+
+                if (anyCapture) {
+                    Move captureMoves[NUM_CELL * NUM_CELL];
+                    int captureCount = getCaptureMoves(board, bestMove.row, bestMove.col, captureMoves);
+                    bestMove = captureMoves[0];
+                    continue;
                 }
             }
 
