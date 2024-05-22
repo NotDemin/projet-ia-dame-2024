@@ -78,6 +78,7 @@ int main() {
         curPlayer = (curPlayer == PAWN_WHITE) ? PAWN_BLACK : PAWN_WHITE;
     }
 
+
     printBoard(board);
     printf("Le gagnant est : %s\n", checkWinner(board) == PAWN_WHITE ? "Blanc" : "Noir");
 

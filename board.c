@@ -162,6 +162,7 @@ int hasNoPawns(PawnType board[NUM_CELL][NUM_CELL], int player) {
 
 int checkWinner(PawnType board[NUM_CELL][NUM_CELL]) {
     int whiteCount = 0, blackCount = 0;
+
     for (int i = 0; i < NUM_CELL; i++) {
         for (int j = 0; j < NUM_CELL; j++) {
             if (board[i][j] == PAWN_WHITE || board[i][j] == QUEEN_WHITE) {

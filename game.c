@@ -125,6 +125,7 @@ int minimax(PawnType board[NUM_CELL][NUM_CELL], int depth, int maximizingPlayer,
 }
 
 Move findBestMoveAI(PawnType board[NUM_CELL][NUM_CELL], int player) {
+
     Move bestMove;
     minimax(board, SEARCH_DEPTH, player, &bestMove);
     return bestMove;

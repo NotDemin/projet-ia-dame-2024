@@ -21,7 +21,6 @@ Tree* createTree();
 void addNode(Tree* tree, Move move, Node* parent);
 Node* findBestMove(Tree* tree);
 void freeTree(Tree* tree);
-
 void checkLegalMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, int curPlayer, Move moves[], int* moveCount);
 int evaluateBoard(PawnType board[NUM_CELL][NUM_CELL]);
 Move findBestMoveAI(PawnType board[NUM_CELL][NUM_CELL], int player);
