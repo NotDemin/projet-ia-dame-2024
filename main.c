@@ -74,7 +74,6 @@ int main() {
         } else {
             handleAIMove(board, curPlayer);
         }
-
         curPlayer = (curPlayer == PAWN_WHITE) ? PAWN_BLACK : PAWN_WHITE;
     }
 

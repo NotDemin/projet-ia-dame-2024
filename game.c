@@ -120,7 +120,6 @@ int minimax(PawnType board[NUM_CELL][NUM_CELL], int depth, int maximizingPlayer,
             }
         }
     }
-
     return bestRating;
 }
 
