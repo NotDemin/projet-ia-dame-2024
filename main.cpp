@@ -10,7 +10,7 @@
 
 // Taille du damier
 const int BOARD_SIZE = 800;
-const int CELL_SIZE = BOARD_SIZE / 10;
+const int CELL_SIZE = BOARD_SIZE / NUM_CELL;
 
 // Fonction pour dessiner le damier
 void drawBoard(sf::RenderWindow &window) {
@@ -24,7 +24,7 @@ void drawBoard(sf::RenderWindow &window) {
             } else {
                 cell.setFillColor(sf::Color::Black);
             }
-            cell.setPosition(j * CELL_SIZE, i * CELL_SIZE); // Inversion de i et j pour dessiner correctement
+            cell.setPosition(j * CELL_SIZE, i * CELL_SIZE);
             window.draw(cell);
             isWhite = !isWhite;
         }
@@ -86,16 +86,15 @@ void getPlayerMove(char* from, char* to) {
 void handleAIMove(PawnType board[NUM_CELL][NUM_CELL], int curPlayer) {
     printf("Tour des %s\n", curPlayer == PAWN_WHITE ? "Blanc" : "Noir");
     Move bestMove = findBestMoveAI(board, curPlayer);
+    makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
 
-    // Vérifie et effectue les captures multiples
-    do {
+    // Vérification des captures multiples
+    while (canCapture(board, bestMove.toRow, bestMove.toCol)) {
+        Move captureMoves[NUM_CELL * NUM_CELL];
+        int captureCount = getCaptureMoves(board, bestMove.toRow, bestMove.toCol, captureMoves);
+        bestMove = captureMoves[0];
         makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
-        if (canCapture(board, bestMove.toRow, bestMove.toCol)) {
-            bestMove = findBestMoveAI(board, curPlayer);
-        } else {
-            break;
-        }
-    } while (true);
+    }
 }
 
 int playGameCLI() {
@@ -152,6 +151,16 @@ int playGameCLI() {
             }
 
             makeMove(board, fromRow, fromCol, toRow, toCol);
+
+            // Vérification des captures multiples pour le joueur
+            while (canCapture(board, toRow, toCol)) {
+                printBoard(board);
+                getPlayerMove(from, to);
+                convertCoordinate(from, &fromRow, &fromCol);
+                convertCoordinate(to, &toRow, &toCol);
+                makeMove(board, fromRow, fromCol, toRow, toCol);
+            }
+
             curPlayer = PAWN_BLACK;
         } else {
             handleAIMove(board, curPlayer);
@@ -166,7 +175,7 @@ int playGameCLI() {
 }
 
 int playGameGUI() {
-    sf::RenderWindow window(sf::VideoMode(800, 800), "Jeu de dames");
+    sf::RenderWindow window(sf::VideoMode(BOARD_SIZE, BOARD_SIZE), "Jeu de dames");
 
     // Initialisation du plateau
     PawnType board[NUM_CELL][NUM_CELL];
