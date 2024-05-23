@@ -21,7 +21,7 @@ void printBoard(PawnType board[NUM_CELL][NUM_CELL]) {
     printf("    a   b   c   d   e   f   g   h   i   j\n");
     for (int i = 0; i < NUM_CELL; i++) {
         printf("  +---+---+---+---+---+---+---+---+---+---+\n");
-        printf("%2d ", i + 1);
+        printf("%2d ", i);
         for (int j = 0; j < NUM_CELL; j++) {
             printf("|");
             switch(board[i][j]) {
@@ -162,7 +162,7 @@ void makeMove(PawnType board[NUM_CELL][NUM_CELL], int fromRow, int fromCol, int 
 
 void convertCoordinate(const char* coord, int* row, int* col) {
     *col = coord[0] - 'a';
-    *row = coord[1] - '1';
+    *row = coord[1] - '0';
 }
 
 int canCapture(PawnType board[NUM_CELL][NUM_CELL], int row, int col) {
@@ -224,7 +224,7 @@ int getCaptureMoves(PawnType board[NUM_CELL][NUM_CELL], int row, int col, Move c
     return moveCount;
 }
 
-int hasNoPawns(PawnType board[NUM_CELL][NUM_CELL], int player) {
+/*int hasNoPawns(PawnType board[NUM_CELL][NUM_CELL], int player) {
     for (int i = 0; i < NUM_CELL; i++) {
         for (int j = 0; j < NUM_CELL; j++) {
             if (board[i][j] % 2 == player % 2 && board[i][j] != PAWN_NULL) {
@@ -234,7 +234,7 @@ int hasNoPawns(PawnType board[NUM_CELL][NUM_CELL], int player) {
     }
     return 1;
 }
-
+*/
 int checkWinner(PawnType board[NUM_CELL][NUM_CELL]) {
     int whiteCount = 0, blackCount = 0;
     for (int i = 0; i < NUM_CELL; i++) {
