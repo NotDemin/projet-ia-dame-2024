@@ -86,13 +86,16 @@ void getPlayerMove(char* from, char* to) {
 void handleAIMove(PawnType board[NUM_CELL][NUM_CELL], int curPlayer) {
     printf("Tour des %s\n", curPlayer == PAWN_WHITE ? "Blanc" : "Noir");
     Move bestMove = findBestMoveAI(board, curPlayer);
-    makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
 
-    // Gérer les captures multiples
-    while (canCapture(board, bestMove.toRow, bestMove.toCol)) {
-        bestMove = findBestMoveAI(board, curPlayer);
+    // Vérifie et effectue les captures multiples
+    do {
         makeMove(board, bestMove.row, bestMove.col, bestMove.toRow, bestMove.toCol);
-    }
+        if (canCapture(board, bestMove.toRow, bestMove.toCol)) {
+            bestMove = findBestMoveAI(board, curPlayer);
+        } else {
+            break;
+        }
+    } while (true);
 }
 
 int playGameCLI() {
